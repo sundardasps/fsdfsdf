@@ -1,25 +1,55 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
   id?: string;
-  name?: string;
   email?: string;
+  image?: string;
+  profile: {
+    [userId: string]: {
+      name: string;
+      preferences: string[];
+      journeyComplete: boolean;
+    };
+  };
 }
 
-const initialState: UserState = {};
+const initialState: UserState = {
+  profile: {},
+};
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
-    setUser(state, action: PayloadAction<UserState>) {
-      return action.payload;
+    setUser(
+      state,
+      action: PayloadAction<{ id: string; email: string; image?: string }>
+    ) {
+      state.id = action.payload.id;
+      state.email = action.payload.email;
+      state.image = action.payload.image;
     },
-    clearUser() {
-      return {};
+    clearUser(state) {
+      state.id = undefined;
+      state.email = undefined;
+      state.image = undefined;
+      // ✅ Note: profile is NOT cleared
+    },
+    updateProfile(
+      state,
+      action: PayloadAction<{
+        userId: string;
+        profile: {
+          name: string;
+          preferences: string[];
+          journeyComplete: boolean;
+        };
+      }>
+    ) {
+      state.profile[action.payload.userId] = action.payload.profile;
     },
   },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser, updateProfile } = userSlice.actions;
 export default userSlice.reducer;

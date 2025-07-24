@@ -1,23 +1,22 @@
-'use client'
+'use client';
 
-import { SessionProvider } from 'next-auth/react'
-import { Provider } from 'react-redux'
-import { makeStore } from '@/lib/store/index'
-import { useRef } from 'react'
+import { SessionProvider } from 'next-auth/react';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { makeStore, persistor } from '@/lib/store';
+import { useRef } from 'react';
 
-import '../lib/i18n'
+import '../lib/i18n';
 
-export function Providers({ children, session }: { children: React.ReactNode, session: any }) {
-  const storeRef = useRef<ReturnType<typeof makeStore> | null>(null)
-  if (!storeRef.current) {
-    storeRef.current = makeStore()
-  }
+export function Providers({ children, session }: { children: React.ReactNode; session: any }) {
+  const storeRef = useRef(makeStore());
+  const persistorRef = useRef(persistor(storeRef.current));
 
   return (
     <Provider store={storeRef.current}>
-      <SessionProvider session={session}>
-        {children}
-      </SessionProvider>
+      <PersistGate loading={null} persistor={persistorRef.current}>
+        <SessionProvider session={session}>{children}</SessionProvider>
+      </PersistGate>
     </Provider>
-  )
+  );
 }

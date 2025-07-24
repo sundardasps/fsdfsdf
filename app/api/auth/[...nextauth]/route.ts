@@ -7,7 +7,11 @@ export const authOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "email@example.com" },
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "email@example.com",
+        },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -25,14 +29,26 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      // Add user ID or custom data to session if needed
-      session.user.id = user.id;
+    async jwt({ token, user, account }) {
+      if (user) {
+        token.id = user.id;
+        token.journeyComplete = false; // default — update later after onboarding
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token?.id) {
+        session.user.id = token.id as string;
+      }
+      session.user.journeyComplete = token.journeyComplete ?? false;
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      return baseUrl;
     },
   },
   pages: {
-    signIn: '/auth/signin', // Custom sign-in page path
+    signIn: "/auth/signin", // Custom sign-in page path
   },
 };
 

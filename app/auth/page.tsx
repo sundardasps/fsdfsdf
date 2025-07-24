@@ -1,21 +1,8 @@
 "use client";
 
-
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 function Page() {
-  const { data: session } = useSession();
-  console.log(session)
-
-  if (session) {
-    return (
-      <>
-        <p>Signed in as {session.user?.email}</p>
-        <button onClick={() => signOut()}>Sign out</button>
-      </>
-    );
-  }
-
   return (
     <div className="flex flex-col w-screen min-h-screen items-center justify-center">
       <div className="flex flex-col relative md:w-xl lg:w-5xl lg:h-lvh   items-center justify-center  sm:p-14 md:p-36  ">
@@ -33,7 +20,7 @@ function Page() {
                   <label>dss</label>
                 </div>
               </form>
-                <button onClick={() => signIn("google")}>google</button>
+              <button onClick={() => signIn("google")}>google</button>
             </div>
           </div>
         </div>
