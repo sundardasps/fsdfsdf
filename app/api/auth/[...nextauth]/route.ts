@@ -31,7 +31,7 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
+        token.id = user.sub;
         token.journeyComplete = false; // default — update later after onboarding
       }
       return token;

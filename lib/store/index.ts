@@ -3,6 +3,9 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import rootReducer from "../reducers";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { newsApi } from "../services/newsApi";
+import { tmdbApi } from "../services/tmdbApi";
+import { socialApi } from "../services/socialApi";
 
 const persistConfig = {
   key: "root",
@@ -19,7 +22,11 @@ export const makeStore = () =>
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: false,
-      }),
+      }).concat(
+        newsApi.middleware,
+        tmdbApi.middleware,
+        socialApi.middleware
+      ),
   });
 
 // This is the missing export 👇

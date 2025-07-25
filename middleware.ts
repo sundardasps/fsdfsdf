@@ -7,7 +7,8 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const isAuthPage = pathname.startsWith("/auth");
-  const isJourneyPage = pathname.startsWith("/app/journey");
+  const isJourneyPage = pathname.startsWith("/journey");
+
 
   // Not logged in & not accessing public or /auth → redirect to /auth
   if (!token && !isAuthPage && !isPublic(pathname)) {
