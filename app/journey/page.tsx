@@ -18,14 +18,14 @@ export default function JourneyPage() {
     currentProfile?.preferences || []
   );
 
-  // useEffect(() => {
-  //   if (!userId) {
-  //     router.push('/auth'); // if not logged in, redirect
-  //   }
-  //   if (currentProfile?.journeyComplete) {
-  //     router.push('/'); // already completed journey
-  //   }
-  // }, [userId, currentProfile, router]);
+  useEffect(() => {
+    if (!userId) {
+      router.push('/auth'); // if not logged in, redirect
+    }
+    if (currentProfile?.journeyComplete) {
+      router.push('/'); 
+    }
+  }, [userId, currentProfile, router]);
 
   const handlePreferenceToggle = (category: string) => {
     if (selectedPreferences.includes(category)) {

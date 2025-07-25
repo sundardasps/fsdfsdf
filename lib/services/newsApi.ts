@@ -20,13 +20,15 @@ export const newsApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
   tagTypes: ["News"],
   endpoints: (builder) => ({
+    // newsApi.ts (RTK Query slice)
     getTopHeadlines: builder.query<
       NewsResponse,
-      { category: string; page?: number }
+      { categories: string[]; page?: number }
     >({
-      query: ({ category, page = 1 }) =>
-        `/news?category=${encodeURIComponent(category)}&page=${page}`,
-      providesTags: (res, err, arg) => [{ type: "News", id: arg.category }],
+      query: ({ categories, page = 1 }) => {
+        const catParam = categories.map(encodeURIComponent).join(",");
+        return `/news?categories=${catParam}&page=${page}`;
+      },
     }),
   }),
 });

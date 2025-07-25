@@ -9,6 +9,8 @@ export default function UserProfileSync() {
   const { data: session } = useSession();
   const dispatch = useAppDispatch();
 
+ 
+
   useEffect(() => {
     if (session?.user) {
       dispatch(

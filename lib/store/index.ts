@@ -29,9 +29,8 @@ export const makeStore = () =>
       ),
   });
 
-// This is the missing export 👇
-export const persistor = (store: ReturnType<typeof makeStore>) =>
-  persistStore(store);
+export const store = makeStore();
+export const persistor = persistStore(store);
 
 // Types
 export type AppStore = ReturnType<typeof makeStore>;

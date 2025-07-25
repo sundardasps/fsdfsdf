@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import UserProfileSync from "@/components/UserProfileSync";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

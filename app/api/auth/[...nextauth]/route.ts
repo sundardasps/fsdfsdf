@@ -15,7 +15,6 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Replace this with your own logic to verify credentials, e.g., query DB
         const user = { id: "1", name: "User", email: credentials?.email };
         if (user) {
           return user;
@@ -28,23 +27,35 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  // callbacks: {
+  //   async jwt({ token, user, account }) {
+  //     if (user) {
+  //       token.id = user.id;
+  //       token.journeyComplete = false; // default — update later after onboarding
+  //     }
+  //     return token;
+  //   },
+  //   async session({ session, token }) {
+  //     if (token?.id) {
+  //       session.user.id = token.id as string;
+  //     }
+  //     session.user.journeyComplete = token.journeyComplete ?? false;
+  //     return session;
+  //   },
+  //   async redirect({ url, baseUrl }) {
+  //     return baseUrl;
+  //   },
+  // },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.id = user.sub;
-        token.journeyComplete = false; // default — update later after onboarding
+        token.journeyComplete = user.journeyComplete ?? false;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token?.id) {
-        session.user.id = token.id as string;
-      }
-      session.user.journeyComplete = token.journeyComplete ?? false;
+      session.user.journeyComplete = token.journeyComplete;
       return session;
-    },
-    async redirect({ url, baseUrl }) {
-      return baseUrl;
     },
   },
   pages: {
