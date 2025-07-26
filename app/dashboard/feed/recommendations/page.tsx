@@ -1,35 +1,34 @@
-// app/dashboard/feed/page.tsx
 "use client";
 
 import { useAppSelector } from "@/lib/store";
 import { useEffect, useState, useRef, useCallback } from "react";
 import ContentCard from "@/components/ContentCard";
-import { useGetTopHeadlinesQuery } from "@/lib/services/newsApi";
+import { useGetMoviesByGenreQuery } from "@/lib/services/tmdbApi";
 
-export default function PersonalizedFeed() {
+export default function RecommendationFeed() {
   const userId = useAppSelector((s) => s.user.id);
   const preferences = useAppSelector((s) =>
-    userId ? s.user.profile[userId]?.preferences : []
-  ) as string[] | undefined;
+    userId ? s.user.profile[userId]?.moviePreferences : []
+  ) as number[] | undefined;
 
   const [page, setPage] = useState(1);
-  const [articles, setArticles] = useState<any[]>([]);
+  const [movies, setMovies] = useState<any[]>([]);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   const shouldSkip = !userId || !preferences || preferences.length === 0;
 
-  const { data, isLoading, isFetching, error } = useGetTopHeadlinesQuery(
+  const { data, isLoading, isFetching, error } = useGetMoviesByGenreQuery(
     { categories: preferences ?? [], page },
     { skip: shouldSkip }
   );
 
   useEffect(() => {
-    if (!data?.articles?.length) return;
+    if (!data?.results?.length) return;
 
-    setArticles((prev) => {
-      const existingUrls = new Set(prev.map((a) => a.url));
-      const newArticles = data.articles.filter((a) => !existingUrls.has(a.url));
-      return [...prev, ...newArticles];
+    setMovies((prev) => {
+      const existingIds = new Set(prev.map((m) => m.id));
+      const newMovies = data.results.filter((m) => !existingIds.has(m.id));
+      return [...prev, ...newMovies];
     });
   }, [data, page]);
 
@@ -53,42 +52,43 @@ export default function PersonalizedFeed() {
     const observer = new IntersectionObserver(handleObserver, option);
     const target = observerRef.current;
 
-    if (target) {
-      observer.observe(target);
-    }
+    if (target) observer.observe(target);
 
     return () => {
       if (target) observer.unobserve(target);
       observer.disconnect();
     };
   }, [handleObserver]);
-  const totalResults = data?.totalResults ?? Infinity;
+
+  const totalPages = data?.total_pages ?? Infinity;
+
   useEffect(() => {
-    if (articles.length >= totalResults) {
-      // Stop observing if all articles fetched
+    if (page >= totalPages) {
       if (observerRef.current) observerRef.current.remove();
     }
-  }, [articles, totalResults]);
+  }, [page, totalPages]);
 
   if (!userId) return null;
   if (error) return <p>Failed to load personalized feed.</p>;
 
   return (
     <section>
-      <h2 className="text-xl font-bold mb-4">Personalized Feed</h2>
+      <h2 className="text-xl font-bold mb-4">
+        Personalized Movie Recommendations
+      </h2>
 
-      {isLoading && !articles.length && <p>Loading…</p>}
+      {isLoading && !movies.length && <p>Loading…</p>}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {articles.map((item) => (
+        {movies.map((item) => (
           <ContentCard
-            key={item.url}
-            id={item.url}
+            key={item.id}
+            id={item.id.toString()}
             title={item.title}
-            description={item.description}
-            imageUrl={item.urlToImage}
-            url={item.url}
-            source="news"
+            description={item.overview}
+            imageUrl={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+            url={`https://www.themoviedb.org/movie/${item.id}`}
+            source="tmdb"
           />
         ))}
       </div>

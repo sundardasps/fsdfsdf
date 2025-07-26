@@ -1,23 +1,35 @@
+// app/api/tmdb/route.ts
 import { NextResponse } from "next/server";
-
-// simple map – you can make it smarter
-const genreMap: Record<string, number> = {
-  action: 28,
-  comedy: 35,
-  drama: 18,
-};
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const genre = searchParams.get("genre") ?? "action";
+  const categories = searchParams.get("categories");
   const page = searchParams.get("page") ?? "1";
-  const genreId = genreMap[genre.toLowerCase()] ?? 28;
 
-  const res = await fetch(
-    `https://api.themoviedb.org/3/discover/movie?with_genres=${genreId}&page=${page}&api_key=${process.env.TMDB_API_KEY}`,
-    { next: { revalidate: 60 } } // optional caching hint
-  );
+  if (!categories) {
+    return NextResponse.json(
+      { status: "error", message: "Missing categories" },
+      { status: 400 }
+    );
+  }
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  const genreParam = categories.split(",")[0]; // only use first genre for TMDB
+
+  const url = `https://api.themoviedb.org/3/discover/movie?with_genres=${genreParam}&page=${page}&api_key=${process.env.TMDB_API_KEY}`;
+
+  try {
+    const response = await fetch(url, { cache: "no-store" });
+    const data = await response.json();
+
+    return NextResponse.json({
+      page: data.page,
+      results: data.results,
+      total_pages: data.total_pages,
+    });
+  } catch (e: any) {
+    return NextResponse.json(
+      { status: "error", message: e.message },
+      { status: 500 }
+    );
+  }
 }

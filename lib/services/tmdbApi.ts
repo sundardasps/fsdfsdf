@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-interface TMDBMovie {
+export interface TMDBMovie {
   id: number;
   title: string;
   overview: string;
@@ -8,7 +8,7 @@ interface TMDBMovie {
   vote_average: number;
 }
 
-interface TMDBResponse {
+export interface TMDBResponse {
   page: number;
   results: TMDBMovie[];
   total_pages: number;
@@ -17,11 +17,15 @@ interface TMDBResponse {
 export const tmdbApi = createApi({
   reducerPath: "tmdbApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
-  tagTypes: ["Movies"],
   endpoints: (builder) => ({
-    getMoviesByGenre: builder.query<TMDBResponse, { genre: string; page?: number }>({
-      query: ({ genre, page = 1 }) => `/tmdb?genre=${genre}&page=${page}`,
-      providesTags: (res, err, arg) => [{ type: "Movies", id: arg.genre }],
+    getMoviesByGenre: builder.query<
+      TMDBResponse,
+      { categories: number[]; page?: number }
+    >({
+      query: ({ categories, page = 1 }) => {
+        const genreParam = categories.join(","); // numbers -> no need to encode
+        return `/tmdb?categories=${genreParam}&page=${page}`;
+      },
     }),
   }),
 });
