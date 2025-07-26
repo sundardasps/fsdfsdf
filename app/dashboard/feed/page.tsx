@@ -1,10 +1,10 @@
 'use client';
 
 import { useAppSelector } from '@/lib/store';
-import { useGetTopHeadlinesQuery } from '@/lib/services/newsApi';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import ContentCard from '@/components/ContentCard';
+import { useGetTopHeadlinesQuery } from '@/lib/services/newsApi';
 
 export default function PersonalizedFeed() {
   const userId = useAppSelector((state) => state.user.id);

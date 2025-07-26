@@ -1,31 +1,36 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '@/lib/store';
-import { updateProfile } from '@/lib/reducers/userSlice';
-import { useRouter } from 'next/navigation';
-import { NEWS_CATEGORIES } from '@/constants/index';
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store";
+import { updateProfile } from "@/lib/reducers/userSlice";
+import { useRouter } from "next/navigation";
+import { NEWS_CATEGORIES } from "@/constants/index";
+import { useSession } from "next-auth/react";
 
 export default function JourneyPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-
+  const { data: session, status: sessionStatus, update } = useSession();
   const { id: userId, profile } = useAppSelector((state) => state.user);
   const currentProfile = userId ? profile[userId] : null;
 
-  const [name, setName] = useState(currentProfile?.name || '');
+  const [name, setName] = useState(currentProfile?.name || "");
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>(
     currentProfile?.preferences || []
   );
 
   useEffect(() => {
-    if (!userId) {
-      router.push('/auth'); // if not logged in, redirect
+    if (status === "loading") return; // wait for session load
+
+    if (!session) {
+      router.push("/auth");
+      return;
     }
-    if (currentProfile?.journeyComplete) {
-      router.push('/'); 
+
+    if (session.user.journeyComplete) {
+      router.push("/");
     }
-  }, [userId, currentProfile, router]);
+  }, [session, status, router]);
 
   const handlePreferenceToggle = (category: string) => {
     if (selectedPreferences.includes(category)) {
@@ -35,21 +40,28 @@ export default function JourneyPage() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!userId) return;
+  const handleSubmit = async () => {
+    try {
+      console.log(userId,"/////////////////")
+      if (!userId) return;
 
-    dispatch(
-      updateProfile({
-        userId,
-        profile: {
-          name,
-          preferences: selectedPreferences,
-          journeyComplete: true,
-        },
-      })
-    );
+      dispatch(
+        updateProfile({
+          userId,
+          profile: {
+            name,
+            preferences: selectedPreferences,
+            journeyComplete: true,
+          },
+        })
+      );
 
-    router.push('/');
+      await update({ journeyComplete: true });
+
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -76,8 +88,8 @@ export default function JourneyPage() {
               onClick={() => handlePreferenceToggle(category)}
               className={`px-3 py-1 rounded border ${
                 selectedPreferences.includes(category)
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100'
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100"
               }`}
             >
               {category}

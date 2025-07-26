@@ -20,6 +20,7 @@ export default function UserProfileSync() {
           image: session.user.image,
         })
       );
+      
     } else {
       dispatch(clearUser());
     }
